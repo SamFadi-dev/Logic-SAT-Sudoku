@@ -82,11 +82,13 @@ def sudoku_generic_constraints(myfile, N):
         output("")
     
     def row_constraint():
+        #Set all the possible value for a case
         for i in range(1, N + 1):
             for j in range(1, N + 1):
                 for k in range(1, N + 1):
                     newlit(i, j, k)
                 newcl()
+                #Only one value in a case
                 for k in range(1, N + 1):
                     for kAlt in range(k + 1, N + 1):
                         new_not()
@@ -94,21 +96,28 @@ def sudoku_generic_constraints(myfile, N):
                         new_not()
                         newlit(i, j, kAlt)
                         newcl()
-    
+            #Must different values in a row
+            for kRow in range(1, N + 1):
+                for jRow in range(1, N + 1):
+                    for jRowAlt in range(jRow + 1, N + 1):
+                        new_not()
+                        newlit(i, jRow, kRow)
+                        new_not()
+                        newlit(i, jRowAlt, kRow)
+                        newcl()
+
     def column_constraint():
         for j in range(1, N + 1):
             for i in range(1, N + 1):
-                for k in range(1, N + 1):
-                    newlit(i, j, k)
-            newcl()
-            #Voir si je peux mettre dans la boucle au dessus
-            for k in range(1, N + 1):
-                    for kAlt in range(k + 1, N + 1):
-                        new_not()
-                        newlit(i, j, k)
-                        new_not()
-                        newlit(i, j, kAlt)
-                        newcl()
+                #Must different values in a row
+                for kcolumn in range(1, N + 1):
+                    for iColumn in range(1, N + 1):
+                        for iColumnAlt in range(iColumn + 1, N + 1):
+                            new_not()
+                            newlit( iColumn, j, kcolumn)
+                            new_not()
+                            newlit(iColumnAlt, j, kcolumn)
+                            newcl()
         
 
     def square_constraint():
@@ -146,7 +155,7 @@ def sudoku_generic_constraints(myfile, N):
     #Gestion des colonnes
     column_constraint()
     # Gestion des N carrés
-    square_constraint()    
+    #square_constraint()    
 
 def sudoku_specific_constraints(myfile, sudoku):
 
