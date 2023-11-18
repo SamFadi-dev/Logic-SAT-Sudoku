@@ -5,7 +5,7 @@ import subprocess
 """
     The above code is a Python script that can solve, check the uniqueness of solution, and generate
     Sudoku puzzles of different sizes. 
-    
+
 """
 
 # reads a sudoku from file
@@ -17,6 +17,13 @@ import subprocess
 # | |2| | |
 # spaces and empty lines are ignored
 def sudoku_read(filename):
+    """
+    The function `sudoku_read` reads a Sudoku puzzle from a file and returns it as a 2D list.
+    
+    :param filename: The filename parameter is a string that represents the name of the file that
+    contains the Sudoku puzzle
+    :return: The function `sudoku_read` returns a 2-dimensional list representing a Sudoku puzzle.
+    """
     myfile = open(filename, 'r')
     sudoku = []
     N = 0
@@ -40,8 +47,16 @@ def sudoku_read(filename):
         sudoku += [line]
     return sudoku
 
-# print sudoku on stdout
 def sudoku_print(myfile, sudoku):
+    """
+    The function `sudoku_print` writes a given sudoku grid to a file in a formatted manner.
+    
+    :param myfile: The `myfile` parameter is the file object that you want to write the Sudoku grid to.
+    It should be opened in write mode before calling the `sudoku_print` function
+    :param sudoku: The `sudoku` parameter is a 2-dimensional list representing the Sudoku puzzle. Each
+    element in the list represents a row in the puzzle, and each element within the row represents a
+    number in the puzzle. A value of 0 represents an empty cell in the puzzle
+    """
     if sudoku == []:
         myfile.write("impossible sudoku\n")
     N = len(sudoku)
@@ -56,9 +71,18 @@ def sudoku_print(myfile, sudoku):
 
 # get number of constraints for sudoku
 def sudoku_constraints_number(sudoku):
+    """
+    The function `sudoku_constraints_number` calculates the number of constraints in a given Sudoku
+    puzzle.
+    
+    :param sudoku: A 2D list representing the Sudoku puzzle. Each element in the list represents a cell
+    in the puzzle, with 0 indicating an empty cell and a number from 1 to N indicating a filled cell. N
+    is the size of the puzzle, typically 9 for a standard Sudoku puzzle
+    :return: the number of constraints for a given Sudoku puzzle.
+    """
     N = len(sudoku)
     # Here generate the number of constraints
-    count = N*N + (N*N) + (N*N) + (N*N)
+    count = (N * N * N)
     return count
 
 
@@ -85,19 +109,30 @@ def sudoku_generic_constraints(myfile, N):
         """
         myfile.write(s)
 
-    # Notice that the following function only works for N = 4 or N = 9
     def newlit(i,j,k):
         """
-        The function `newlit` takes three arguments `i`, `j`, and `k`, and outputs their concatenated
-        string representation followed by a space.
+        The function takes three integers as input, converts them to strings, adds leading zeros if
+        necessary, concatenates them, and outputs the result.
         
-        :param i: The parameter "i" is a variable that represents the first value to be concatenated
-        into the output string
+        :param i: The parameter "i" is an integer value
         :param j: The parameter "j" is a variable that is being passed into the function "newlit"
-        :param k: The parameter "k" is a variable that is being passed into the function "newlit"
+        :param k: The parameter "k" in the code represents a numerical value
         """
-        output(str(i)+str(j)+str(k)+ " ")
-    
+
+        iCompat = str(i)
+        jCompat = str(j)
+        kCompat = str(k)
+
+        if(N > 9):
+            if i <= 9:
+                iCompat = "0" + iCompat 
+            if j <= 9:
+                jCompat = "0" + jCompat
+            if k <= 9:
+                kCompat = "0" + kCompat
+            
+        output(iCompat + jCompat + kCompat + " ")
+
     def new_not():
         """
         The function "new_not" outputs a hyphen ("-").
@@ -111,17 +146,20 @@ def sudoku_generic_constraints(myfile, N):
         output("0\n")
 
     def newcomment(s):
-#        output("c %s\n"%s)
+        """
+        The function "newcomment" takes a string as input and outputs a comment with the string as its
+        content.
+        
+        :param s: The parameter "s" in the "newcomment" function is a string that represents the content
+        of the comment
+        """
+        output("c %s\n"%s)
         output("")
     
-    def row_constraint(N):
+    def row_constraint():
         """
-        The function `row_constraint` sets up constraints for a Sudoku puzzle, ensuring that each row
-        contains unique values.
-        
-        :param N: The parameter N represents the size of the grid or the number of rows and columns in
-        the grid. It is used to define the range of the loops and to set the possible values for each
-        case in the grid
+        The function implements row constraints for a Sudoku puzzle, ensuring that each row contains
+        unique values.
         """
         #Set all the possible value for a case
         for i in range(1, N + 1):
@@ -129,53 +167,37 @@ def sudoku_generic_constraints(myfile, N):
                 for k in range(1, N + 1):
                     newlit(i, j, k)
                 newcl()
-                #Only one value in a case
-                for k in range(1, N + 1):
-                    for kAlt in range(k + 1, N + 1):
+            #Must be different values in a row
+            for kRow in range(1, N + 1):
+                for j in range(1, N + 1):
+                    for jAlt in range(j + 1, N + 1):
+                        new_not()
+                        newlit(i, j, kRow)
+                        new_not()
+                        newlit(i, jAlt, kRow)
+                        newcl()
+
+    def column_constraint():
+        """
+        The function enforces the constraint that each column in a grid must contain different values.
+        """
+        for j in range(1, N + 1):
+            #Must be different values in a column
+            for k in range(1, N + 1):
+                for i in range(1, N + 1):
+                    for iAlt in range(i + 1, N + 1):
                         new_not()
                         newlit(i, j, k)
                         new_not()
-                        newlit(i, j, kAlt)
+                        newlit(iAlt, j, k)
                         newcl()
-            #Must be different values in a row
-            for kRow in range(1, N + 1):
-                for jRow in range(1, N + 1):
-                    for jRowAlt in range(jRow + 1, N + 1):
-                        new_not()
-                        newlit(i, jRow, kRow)
-                        new_not()
-                        newlit(i, jRowAlt, kRow)
-                        newcl()
-
-    def column_constraint(N):
-        """
-        The function `column_constraint` enforces the constraint that each column in a grid of size N
-        must contain different values.
-        
-        :param N: The parameter N represents the number of columns in the constraint
-        """
-        for j in range(1, N + 1):
-            for i in range(1, N + 1):
-                #Must be different values in a column
-                for kcolumn in range(1, N + 1):
-                    for iColumn in range(1, N + 1):
-                        for iColumnAlt in range(iColumn + 1, N + 1):
-                            new_not()
-                            newlit( iColumn, j, kcolumn)
-                            new_not()
-                            newlit(iColumnAlt, j, kcolumn)
-                            newcl()
         
 
-    def square_constraint(N):
+    def square_constraint():
         """
-        The function checks for constraints in a square grid where each value must be different within
-        the square and across the entire grid.
-        
-        :param N: The parameter N represents the size of the square. It is used to determine the range
-        of the loops and the size of the square
+        The function enforces the constraint that each square in a grid must contain different values.
         """
-        # Must be different values in a square
+        # Must be different values in all squares
         for square_row in range(0, n):
             for square_col in range(0, n):
                 for i in range(1, n + 1):
@@ -190,7 +212,6 @@ def sudoku_generic_constraints(myfile, N):
                                     newlit(n * square_row + iAlt, n * square_col + jAlt, k)
                                     newcl()
                         
-
     if N == 4:
         n = 2
     elif N == 9:
@@ -204,9 +225,9 @@ def sudoku_generic_constraints(myfile, N):
    
     # The `row_constraint(N)`, `column_constraint(N)`, and `square_constraint(N)` functions are
     # responsible for generating the generic constraints for a Sudoku puzzle of size N.
-    row_constraint(N)
-    column_constraint(N)
-    square_constraint(N)    
+    row_constraint()
+    column_constraint()
+    square_constraint()    
 
 def sudoku_specific_constraints(myfile, sudoku):
     """
@@ -223,22 +244,61 @@ def sudoku_specific_constraints(myfile, sudoku):
     N = len(sudoku)
 
     def output(s):
+        """
+        The function "output" writes the string "s" to a file.
+        
+        :param s: The parameter "s" is a string that represents the content that will be written to a
+        file
+        """
         myfile.write(s)
 
-    # Notice that the following function only works for N = 4 or N = 9
     def newlit(i,j,k):
-        output(str(i)+str(j)+str(k)+ " ")
+        """
+        The function "newlit" takes three integers as input, converts them to strings, adds leading
+        zeros if necessary, concatenates them, and outputs the result followed by a space.
+        
+        :param i: The parameter `i` is an integer value
+        :param j: The parameter "j" is a variable that is being passed into the function "newlit"
+        :param k: The parameter "k" in the code represents a numerical value
+        """
+        iCompat = str(i)
+        jCompat = str(j)
+        kCompat = str(k)
+        if N > 9:
+            if i <= 9:
+                iCompat = "0" + iCompat 
+            if j <= 9:
+                jCompat = "0" + jCompat
+            if k <= 9:
+                kCompat = "0" + kCompat
+            
+        output(iCompat + jCompat + kCompat + " ")
 
     def newcl():
+        """
+        The function `newcl` outputs the number 0 followed by a newline character.
+        """
         output("0\n")
-
+    
     for i in range(N):
         for j in range(N):
             if sudoku[i][j] > 0:
                 newlit(i + 1, j + 1, sudoku[i][j])
                 newcl()
 
+
+
 def sudoku_other_solution_constraint(myfile, sudoku):
+    """
+    The function `sudoku_other_solution_constraint` writes the constraints for excluding the current
+    solution of a Sudoku puzzle to a file.
+    
+    :param myfile: The parameter "myfile" is the file object that you want to write the output to. It
+    should be opened in write mode before passing it to the function
+    :param sudoku: The parameter "sudoku" is a 2-dimensional list representing the Sudoku puzzle. Each
+    element in the list represents a cell in the puzzle, with 0 indicating an empty cell and a number
+    from 1 to N indicating a filled cell. The size of the puzzle is determined by the length of
+    """
 
     N = len(sudoku)
 
@@ -247,19 +307,40 @@ def sudoku_other_solution_constraint(myfile, sudoku):
 
     # Notice that the following function only works for N = 4 or N = 9
     def newlit(i,j,k):
-        output(str(i)+str(j)+str(k)+ " ")
+        iCompat = str(i)
+        jCompat = str(j)
+        kCompat = str(k)
+        if N > 9:
+            if i <= 9:
+                iCompat = "0" + iCompat 
+            if j <= 9:
+                jCompat = "0" + jCompat
+            if k <= 9:
+                kCompat = "0" + kCompat
+            
+        output(iCompat + jCompat + kCompat + " ")
+    
+    def new_not():
+        """
+        The function "new_not" outputs a hyphen ("-").
+        """
+        output("-")
 
     def newcl():
         output("0\n")
 
-    # Here should come the constraint generation
-    # ...
+    # Exclude the current solution
+    for i in range(1, N + 1):
+        for j in range(1, N + 1):
+            if sudoku[i-1][j-1] > 0:
+                new_not()
+                newlit(i, j, sudoku[i-1][j-1])
     newcl()
-                
+                               
 def sudoku_solve(filename):
     """
     The function `sudoku_solve` takes a filename as input, runs a SAT solver on a Sudoku CNF file, and
-    returns the solved Sudoku puzzle as a 2D array.
+    returns the solved Sudoku puzzle as a 2D list.
     
     :param filename: The `filename` parameter is the name of the file that contains the Sudoku puzzle in
     CNF format. This file is used as input for the SAT solver to solve the Sudoku puzzle
@@ -269,19 +350,23 @@ def sudoku_solve(filename):
     command = "java -jar org.sat4j.core.jar sudoku.cnf"
     process = subprocess.Popen(command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
+
     for line in out.split('\n'):
         if line == "" or line[0] == 'c':
             continue
+
         if line[0] == 's':
             if line != 's SATISFIABLE':
                 return []
             continue
+
         if line[0] == 'v':
             line = line[2:]
             units = line.split()
             if units.pop() != '0':
                 exit("strange output from SAT solver:" + line + "\n")
             units = [int(x) for x in units if int(x) >= 0]
+
             N = len(units)
             if N == 16:
                 N = 4
@@ -294,9 +379,19 @@ def sudoku_solve(filename):
             else:
                 exit("strange output from SAT solver:" + line + "\n")
             sudoku = [ [0 for i in range(N)] for j in range(N)]
-            # Notice that the following function only works for N = 4 or N = 9
-            for number in units:
-                sudoku[number // 100 - 1][( number // 10 )% 10 - 1] = number % 10
+
+            if N <= 9 :
+                # Notice that the following loop only works for N = 4 or N = 9
+                for number in units:
+                    sudoku[number // 100 - 1][( number // 10 )% 10 - 1] = number % 10
+            else:
+                # Notice that the following loop only works for N > 9
+                for number in units:
+                    number_str = str(number).zfill(6)
+                    row = int(number_str[0:2]) - 1
+                    col = int(number_str[2:4]) - 1
+                    sudoku[row][col] = int(number_str[4:6])
+
             return sudoku
         exit("strange output from SAT solver:" + line + "\n")
         return []
@@ -337,6 +432,7 @@ if mode == Mode.SOLVE or mode == Mode.UNIQUE:
     # Notice that this may not be correct for N > 9
     myfile.write("p cnf "+str(N)+str(N)+str(N)+" "+
                  str(sudoku_constraints_number(sudoku))+"\n")
+    
     sudoku_generic_constraints(myfile, N)
     sudoku_specific_constraints(myfile, sudoku)
     myfile.close()
@@ -345,21 +441,25 @@ if mode == Mode.SOLVE or mode == Mode.UNIQUE:
     sudoku = sudoku_solve("sudoku.cnf")    
     sys.stdout.write("\nsolution\n")
     sudoku_print(sys.stdout, sudoku)
+
     if sudoku != [] and mode == Mode.UNIQUE:
         myfile = open("sudoku.cnf", 'a')
         sudoku_other_solution_constraint(myfile, sudoku)
         myfile.close()
         sudoku = sudoku_solve("sudoku.cnf")
+
         if sudoku == []:
             sys.stdout.write("\nsolution is unique\n")
         else:
             sys.stdout.write("\nother solution\n")
             sudoku_print(sys.stdout, sudoku)
+
 elif mode == Mode.CREATE:
     size = int(sys.argv[2])
     sudoku = sudoku_generate(size)
     sys.stdout.write("\ngenerated sudoku\n")
     sudoku_print(sys.stdout, sudoku)
+
 elif mode == Mode.CREATEMIN:
     size = int(sys.argv[2])
     sudoku = sudoku_generate(size)
