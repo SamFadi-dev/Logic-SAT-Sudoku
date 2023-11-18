@@ -2,6 +2,7 @@
 
 import sys
 import subprocess
+import random
 """
     The above code is a Python script that can solve, check the uniqueness of solution, and generate
     Sudoku puzzles of different sizes. 
@@ -287,7 +288,6 @@ def sudoku_specific_constraints(myfile, sudoku):
                 newcl()
 
 
-
 def sudoku_other_solution_constraint(myfile, sudoku):
     """
     The function `sudoku_other_solution_constraint` writes the constraints for excluding the current
@@ -305,7 +305,6 @@ def sudoku_other_solution_constraint(myfile, sudoku):
     def output(s):
         myfile.write(s)
 
-    # Notice that the following function only works for N = 4 or N = 9
     def newlit(i,j,k):
         iCompat = str(i)
         jCompat = str(j)
@@ -396,9 +395,54 @@ def sudoku_solve(filename):
         exit("strange output from SAT solver:" + line + "\n")
         return []
 
-def sudoku_generate(size):
-    #TODO
-    return []
+def sudoku_generate(size, cm):
+    addZero = ""
+    if size == 4:
+        path = "sudoku4x4.txt"
+    elif size == 9:
+        number = random.randint(0,99)
+        if number < 10:
+            addZero = "0"
+        path = "sudoku9x9/sudoku" + addZero + str(number) + ".txt"
+
+    elif size == 16:
+        number = random.randint(0,9)
+        if number < 10:
+            addZero = "0"
+        path = "sudoku16x16/sudoku" + addZero + str(number) + ".txt"
+
+    elif size == 25:
+        number = random.randint(0,3)
+        if number < 10:
+            addZero = "0"
+        path = "sudoku25x25/sudoku" + addZero + str(number) + ".txt"
+
+    else:            
+        sys.stdout.write("\nWRONG SIZE\n")
+        return []
+
+    N = size     
+    sudoku = sudoku_read(path)
+    myfile = open("sudoku.cnf", 'w')
+    myfile.write("p cnf "+str(N)+str(N)+str(N)+" "+
+                 str(sudoku_constraints_number(sudoku))+"\n")
+    
+    sudoku_generic_constraints(myfile, N)
+    sudoku_specific_constraints(myfile, sudoku)
+    myfile.close()
+
+    sudoku = sudoku_solve("sudoku.cnf")
+    removedNumber = 0
+    isUnique = False
+    for i in range (size):
+        for j in range (size):
+            number = random.randint(1,2)
+            if (size * size) - removedNumber > size*size / 2:
+                if(number == 1):
+                    sudoku[i][j] = 0
+                    removedNumber = removedNumber + 1
+
+    return sudoku
     
 from enum import Enum
 class Mode(Enum):
@@ -456,12 +500,12 @@ if mode == Mode.SOLVE or mode == Mode.UNIQUE:
 
 elif mode == Mode.CREATE:
     size = int(sys.argv[2])
-    sudoku = sudoku_generate(size)
+    sudoku = sudoku_generate(size, False)
     sys.stdout.write("\ngenerated sudoku\n")
     sudoku_print(sys.stdout, sudoku)
 
 elif mode == Mode.CREATEMIN:
     size = int(sys.argv[2])
-    sudoku = sudoku_generate(size)
+    sudoku = sudoku_generate(size, True)
     sys.stdout.write("\ngenerated sudoku\n")
     sudoku_print(sys.stdout, sudoku)
