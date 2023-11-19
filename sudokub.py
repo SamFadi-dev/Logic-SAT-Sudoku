@@ -98,7 +98,7 @@ def sudoku_generic_constraints(myfile, N):
     will be written. It is used by the `output` function to write strings to the file
     :param N: The parameter N represents the size of the Sudoku grid or the number of rows and columns
     in the grid. It is used to define the range of the loops and to set the possible values for each
-    case in the grid
+    cell in the grid
     """
 
     def output(s):
@@ -162,7 +162,7 @@ def sudoku_generic_constraints(myfile, N):
         The function implements row constraints for a Sudoku puzzle, ensuring that each row contains
         unique values.
         """
-        #Set all the possible value for a case
+        #Set all the possible value for a cell
         for i in range(1, N + 1):
             for j in range(1, N + 1):
                 for k in range(1, N + 1):
@@ -196,7 +196,7 @@ def sudoku_generic_constraints(myfile, N):
 
     def square_constraint():
         """
-        The function enforces the constraint that each square in a grid must contain different values.
+        The function enforces the constraint that each square n x n in a grid must contain different values.
         """
         # Must be different values in all squares
         for square_row in range(0, n):
@@ -492,7 +492,7 @@ def sudoku_generate(size, cm, difficultyOption):
     myfile.close()
     sudoku = sudoku_solve("sudoku.cnf")
 
-    #highest difficulty => more empty cases => slower generation
+    #highest difficulty => more empty cells => slower generation
     class Difficulty(Enum):
         Easy = 2
         Medium = 4
@@ -522,18 +522,18 @@ def sudoku_generate(size, cm, difficultyOption):
                         removedNumber = removedNumber + 1
                         print("Unique Sudoku with sudoku["+str(i + 1)+"]["
                               + str(j + 1)
-                              +"] case removed")
+                              +"] cell removed")
                     else:
                         print("/!\\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["
                               + str(j + 1)+"] " + 
-                              "case removed (Case Restored) /!\\ ")
+                              "cell removed (cell Restored) /!\\ ")
                         sudoku[i][j] = temp
-    #remove all chosen cases
+    #remove all chosen cells
     for i in range (size):
         for j in range (size):
             if(sudoku[i][j] > 0):
                 number = random.randint(1, difficulty)
-                #if random number is choosen => remove case
+                #if random number is choosen => remove cell
                 if(number < difficulty):
                     temp = sudoku[i][j]
                     sudoku[i][j] = 0
@@ -542,11 +542,11 @@ def sudoku_generate(size, cm, difficultyOption):
                     if sudokuUniqueness == []:
                         removedNumber = removedNumber + 1
                         print("Unique Sudoku with sudoku["+str(i + 1)+"]["
-                            +str(j + 1)+"] case removed")
+                            +str(j + 1)+"] cell removed")
                     else:
                         print("/!\\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["
                             +str(j + 1)+"] " 
-                            + "case removed (Case Restored) /!\\ ")
+                            + "cell removed (cell Restored) /!\\ ")
                         sudoku[i][j] = temp
     print("--------Creation of Sudoku Finished--------")          
     return sudoku
