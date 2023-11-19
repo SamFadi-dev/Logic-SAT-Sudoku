@@ -3,11 +3,8 @@
 import sys
 import subprocess
 import random
-"""
-    The above code is a Python script that can solve, check the uniqueness of solution, and generate
-    Sudoku puzzles of different sizes. 
-
-"""
+from enum import Enum
+import time
 
 # reads a sudoku from file
 # columns are separated by |, lines by newlines
@@ -303,9 +300,23 @@ def sudoku_other_solution_constraint(myfile, sudoku):
     N = len(sudoku)
 
     def output(s):
+        """
+        The function "output" writes the string "s" to a file.
+        
+        :param s: The parameter "s" is a string that represents the content that will be written to a
+        file
+        """
         myfile.write(s)
 
     def newlit(i,j,k):
+        """
+        The function "newlit" takes three integers as input, converts them to strings, adds leading
+        zeros if necessary, concatenates them, and outputs the result followed by a space.
+        
+        :param i: The parameter `i` is an integer value
+        :param j: The parameter "j" is a variable that is being passed into the function "newlit"
+        :param k: The parameter "k" in the code represents a numerical value
+        """
         iCompat = str(i)
         jCompat = str(j)
         kCompat = str(k)
@@ -326,6 +337,9 @@ def sudoku_other_solution_constraint(myfile, sudoku):
         output("-")
 
     def newcl():
+        """
+        The function `newcl` outputs the number 0 followed by a newline character.
+        """
         output("0\n")
 
     # Exclude the current solution
@@ -396,9 +410,34 @@ def sudoku_solve(filename):
         return []
 
 
-def sudoku_generate(size, cm):
+def sudoku_generate(size, cm, difficultyOption):
+    """
+    The function `sudoku_generate` generates a Sudoku puzzle of a given size and difficulty level, with
+    the option to enforce uniqueness of the solution.
+    
+    :param size: The parameter "size" represents the size of the Sudoku puzzle. It can be 4, 9, 16, or
+    25, representing a 4x4, 9x9, 16x16, or 25x25 puzzle, respectively
+    :param cm: The parameter `cm` is a boolean value that determines whether to use the "cm" (complete
+    and minimal) method for generating the Sudoku puzzle. If `cm` is set to `True`, the Sudoku puzzle
+    will have only `size - 1` numbers and the uniqueness of the puzzle will
+    :param difficultyOption: The `difficultyOption` parameter is used to specify the difficulty level of
+    the generated Sudoku puzzle. It can take three possible values: "easy", "medium", or "hard". The
+    difficulty level determines the number of empty cells in the generated puzzle, with "easy" having
+    the fewest empty cells
+    :return: The function `sudoku_generate` returns a Sudoku puzzle.
+    """
 
     def check_uniqueness(sudoku):
+        """
+        The function `check_uniqueness` takes a Sudoku puzzle as input, writes it to a file in CNF
+        format, solves the puzzle using a SAT solver, adds a constraint to find another solution, solves
+        the modified puzzle again, and returns the result.
+        
+        :param sudoku: The parameter "sudoku" is a 2-dimensional list representing a Sudoku puzzle. Each
+        element in the list represents a row in the puzzle, and each element within the row represents a
+        number in the puzzle. The numbers can be integers or strings
+        :return: the variable `sudokuUniqueness`.
+        """
         sudokuUniqueness = sudoku
         myfile = open("sudoku.cnf", 'w')
         myfile.write("p cnf "+str(N)+str(N)+str(N)+" "+
@@ -439,6 +478,7 @@ def sudoku_generate(size, cm):
         sys.stdout.write("\nWRONG SIZE\n")
         return []
 
+    print("\n--------Creation of Sudoku Starting--------")
     N = size     
     sudoku = sudoku_read(path)
     myfile = open("sudoku.cnf", 'w')
@@ -449,24 +489,65 @@ def sudoku_generate(size, cm):
     myfile.close()
     sudoku = sudoku_solve("sudoku.cnf")
 
+    #highest difficulty => more empty cases => slower generation
+    class Difficulty(Enum):
+        Easy = 2
+        Medium = 4
+        Hard = 10
+
+    if(difficultyOption == "easy"):
+        difficulty = Difficulty.Easy.value
+    elif(difficultyOption == "medium"):
+        difficulty = Difficulty.Medium.value
+    elif(difficultyOption == "hard"):
+        difficulty = Difficulty.Hard.value
+    else:
+        difficulty = Difficulty.Medium.value
+    print("\n--------Chosen Difficulty : " + difficultyOption.upper() + "--------")
+
     removedNumber = 0
+    #Sudokus with only <size> −1 numbers
+    if(cm == True):
+        for i in range (size):
+            for j in range (size):
+                if(sudoku[i][j] == size):
+                    temp = sudoku[i][j]
+                    sudoku[i][j] = 0
+                    #Check the uniqueness
+                    sudokuUniqueness = check_uniqueness(sudoku)
+                    if sudokuUniqueness == []:
+                        removedNumber = removedNumber + 1
+                        print("Unique Sudoku with sudoku["+str(i + 1)+"]["
+                            +str(j + 1)+"] case removed")
+                    else:
+                        print("/!\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["
+                            +str(j + 1)+"] " 
+                            + "case removed (Case Restored) /!\ ")
+                        sudoku[i][j] = temp
+    #remove all chosen cases
     for i in range (size):
         for j in range (size):
-            number = random.randint(1,2)
-            if(number == 1):
-                temp = sudoku[i][j]
-                sudoku[i][j] = 0
-                sudokuUniqueness = check_uniqueness(sudoku)
-                if sudokuUniqueness == []:
-                    removedNumber = removedNumber + 1
-                    print("Unique Sudoku with sudoku["+str(i + 1)+"]["+str(j + 1)+"] case removed")
-                else:
-                    print("/!\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["+str(j + 1)+"] " 
-                          + "case removed (Case Restored) /!\ ")
-                    sudoku[i][j] = temp            
+            if(sudoku[i][j] > 0):
+                number = random.randint(1, difficulty)
+                #if random number is choosen => remove case
+                if(number < difficulty):
+                    temp = sudoku[i][j]
+                    sudoku[i][j] = 0
+                    #Check the uniqueness
+                    sudokuUniqueness = check_uniqueness(sudoku)
+                    if sudokuUniqueness == []:
+                        removedNumber = removedNumber + 1
+                        print("Unique Sudoku with sudoku["+str(i + 1)+"]["
+                            +str(j + 1)+"] case removed")
+                    else:
+                        print("/!\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["
+                            +str(j + 1)+"] " 
+                            + "case removed (Case Restored) /!\ ")
+                        sudoku[i][j] = temp
+    print("--------Creation of Sudoku Finished--------")          
     return sudoku
     
-from enum import Enum
+
 class Mode(Enum):
     SOLVE = 1
     UNIQUE = 2
@@ -479,7 +560,7 @@ OPTIONS["-u"] = Mode.UNIQUE
 OPTIONS["-c"] = Mode.CREATE
 OPTIONS["-cm"] = Mode.CREATEMIN
 
-if len(sys.argv) != 3 or not sys.argv[1] in OPTIONS :
+if len(sys.argv) > 4 or not sys.argv[1] in OPTIONS :
     sys.stdout.write("./sudokub.py <operation> <argument>\n")
     sys.stdout.write("     where <operation> can be -s, -u, -c, -cm\n")
     sys.stdout.write("  ./sudokub.py -s <input>.txt: solves the Sudoku in input, whatever its size\n")
@@ -488,6 +569,8 @@ if len(sys.argv) != 3 or not sys.argv[1] in OPTIONS :
     sys.stdout.write("  ./sudokub.py -cm <size>: creates a Sudoku of appropriate <size> using only <size>-1 numbers\n")
     sys.stdout.write("    <size> is either 4, 9, 16, or 25\n")
     exit("Bad arguments\n")
+
+start_time = time.time()
 
 mode = OPTIONS[sys.argv[1]]
 if mode == Mode.SOLVE or mode == Mode.UNIQUE:
@@ -522,12 +605,24 @@ if mode == Mode.SOLVE or mode == Mode.UNIQUE:
 
 elif mode == Mode.CREATE:
     size = int(sys.argv[2])
-    sudoku = sudoku_generate(size, False)
+    if len(sys.argv) > 3:
+        difficulty = str(sys.argv[3])
+    else:
+        difficulty = "medium"
+    sudoku = sudoku_generate(size, False, difficulty)
     sys.stdout.write("\ngenerated sudoku\n")
     sudoku_print(sys.stdout, sudoku)
 
 elif mode == Mode.CREATEMIN:
     size = int(sys.argv[2])
-    sudoku = sudoku_generate(size, True)
+    if len(sys.argv) > 3:
+        difficulty = str(sys.argv[3])
+    else:
+        difficulty = "medium"
+    sudoku = sudoku_generate(size, True, difficulty)
     sys.stdout.write("\ngenerated sudoku\n")
     sudoku_print(sys.stdout, sudoku)
+
+end_time = time.time()
+execution_time = end_time - start_time
+print(f"\nThe program took %.2f seconds to execute." % execution_time)
