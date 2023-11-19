@@ -6,6 +6,13 @@ import random
 from enum import Enum
 import time
 
+
+
+#------------------------------------------------------------------------------
+#-------------------------------FUNCTIONS--------------------------------------
+#------------------------------------------------------------------------------
+
+
 # reads a sudoku from file
 # columns are separated by |, lines by newlines
 # Example of a 4x4 sudoku:
@@ -67,7 +74,6 @@ def sudoku_print(myfile, sudoku):
             myfile.write("|")
         myfile.write("\n")
 
-# get number of constraints for sudoku
 def sudoku_constraints_number(sudoku):
     """
     The function `sudoku_constraints_number` calculates the number of constraints in a given Sudoku
@@ -83,9 +89,6 @@ def sudoku_constraints_number(sudoku):
     count = (N * N * N)
     return count
 
-
-
-# prints the generic constraints for sudoku of size N
 def sudoku_generic_constraints(myfile, N):
     """
     The function `sudoku_generic_constraints` generates generic constraints for a Sudoku puzzle of size
@@ -518,11 +521,12 @@ def sudoku_generate(size, cm, difficultyOption):
                     if sudokuUniqueness == []:
                         removedNumber = removedNumber + 1
                         print("Unique Sudoku with sudoku["+str(i + 1)+"]["
-                            +str(j + 1)+"] case removed")
+                              + str(j + 1)
+                              +"] case removed")
                     else:
-                        print("/!\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["
-                            +str(j + 1)+"] " 
-                            + "case removed (Case Restored) /!\ ")
+                        print("/!\\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["
+                              + str(j + 1)+"] " + 
+                              "case removed (Case Restored) /!\\ ")
                         sudoku[i][j] = temp
     #remove all chosen cases
     for i in range (size):
@@ -540,13 +544,18 @@ def sudoku_generate(size, cm, difficultyOption):
                         print("Unique Sudoku with sudoku["+str(i + 1)+"]["
                             +str(j + 1)+"] case removed")
                     else:
-                        print("/!\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["
+                        print("/!\\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["
                             +str(j + 1)+"] " 
-                            + "case removed (Case Restored) /!\ ")
+                            + "case removed (Case Restored) /!\\ ")
                         sudoku[i][j] = temp
     print("--------Creation of Sudoku Finished--------")          
     return sudoku
-    
+
+
+
+#------------------------------------------------------------------------------
+#-------------------------------MAIN CODE--------------------------------------
+#------------------------------------------------------------------------------
 
 class Mode(Enum):
     SOLVE = 1
