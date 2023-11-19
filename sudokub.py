@@ -395,7 +395,25 @@ def sudoku_solve(filename):
         exit("strange output from SAT solver:" + line + "\n")
         return []
 
+
 def sudoku_generate(size, cm):
+
+    def check_uniqueness(sudoku):
+        sudokuUniqueness = sudoku
+        myfile = open("sudoku.cnf", 'w')
+        myfile.write("p cnf "+str(N)+str(N)+str(N)+" "+
+                    str(sudoku_constraints_number(sudokuUniqueness))+"\n")
+        sudoku_generic_constraints(myfile, N)
+        sudoku_specific_constraints(myfile, sudokuUniqueness)
+        myfile.close()
+        sudokuUniqueness = sudoku_solve("sudoku.cnf")
+        myfile = open("sudoku.cnf", 'a')
+        sudoku_other_solution_constraint(myfile, sudokuUniqueness)
+        myfile.close()
+        sudokuUniqueness = sudoku_solve("sudoku.cnf")
+
+        return sudokuUniqueness
+    
     addZero = ""
     if size == 4:
         path = "sudoku4x4.txt"
@@ -426,22 +444,26 @@ def sudoku_generate(size, cm):
     myfile = open("sudoku.cnf", 'w')
     myfile.write("p cnf "+str(N)+str(N)+str(N)+" "+
                  str(sudoku_constraints_number(sudoku))+"\n")
-    
     sudoku_generic_constraints(myfile, N)
     sudoku_specific_constraints(myfile, sudoku)
     myfile.close()
-
     sudoku = sudoku_solve("sudoku.cnf")
+
     removedNumber = 0
-    isUnique = False
     for i in range (size):
         for j in range (size):
             number = random.randint(1,2)
-            if (size * size) - removedNumber > size*size / 2:
-                if(number == 1):
-                    sudoku[i][j] = 0
+            if(number == 1):
+                temp = sudoku[i][j]
+                sudoku[i][j] = 0
+                sudokuUniqueness = check_uniqueness(sudoku)
+                if sudokuUniqueness == []:
                     removedNumber = removedNumber + 1
-
+                    print("Unique Sudoku with sudoku["+str(i + 1)+"]["+str(j + 1)+"] case removed")
+                else:
+                    print("/!\ Non Unique Sudoku with sudoku["+str(i + 1)+"]["+str(j + 1)+"] " 
+                          + "case removed (Case Restored) /!\ ")
+                    sudoku[i][j] = temp            
     return sudoku
     
 from enum import Enum
