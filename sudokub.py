@@ -616,6 +616,10 @@ elif mode == Mode.CREATE:
     size = int(sys.argv[2])
     if len(sys.argv) > 3:
         difficulty = str(sys.argv[3])
+        if(str(sys.argv[3]) != "easy"):
+            if(str(sys.argv[3]) != "medium"):
+                if(str(sys.argv[3]) != "hard"):
+                    difficulty = "medium"
     else:
         difficulty = "medium"
     sudoku = sudoku_generate(size, False, difficulty)
@@ -626,8 +630,13 @@ elif mode == Mode.CREATEMIN:
     size = int(sys.argv[2])
     if len(sys.argv) > 3:
         difficulty = str(sys.argv[3])
+        if(str(sys.argv[3]) != "easy"):
+            if(str(sys.argv[3]) != "medium"):
+                if(str(sys.argv[3]) != "hard"):
+                    difficulty = "medium"
     else:
         difficulty = "medium"
+
     sudoku = sudoku_generate(size, True, difficulty)
     sys.stdout.write("\ngenerated sudoku\n")
     sudoku_print(sys.stdout, sudoku)
